@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Laborator_1
 {
-    delegate void DelegateEvent(object sender, EventArgs args);
-
-    class StatusStripEventHandler
+    interface IObserver
     {
-        //private event DelegateEvent events;
+        void RefreshTables();
     }
 }

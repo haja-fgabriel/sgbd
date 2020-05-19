@@ -29,10 +29,9 @@
         private void InitializeComponent()
         {
             this.manufacturersGroupBox = new System.Windows.Forms.GroupBox();
-            this.manufacturersDataGridView = new System.Windows.Forms.DataGridView();
+            this.parentDataGridView = new System.Windows.Forms.DataGridView();
             this.deleteButton = new System.Windows.Forms.Button();
             this.addButton = new System.Windows.Forms.Button();
-            this.refreshButton = new System.Windows.Forms.Button();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.statusStripText = new System.Windows.Forms.ToolStripStatusLabel();
             this.modelsGroupBox = new System.Windows.Forms.GroupBox();
@@ -41,16 +40,16 @@
             this.updateButton = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
             this.genericInputPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.modelsDataGridView = new System.Windows.Forms.DataGridView();
+            this.childDataGridView = new System.Windows.Forms.DataGridView();
             this.mainLayout = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.manufacturersGroupBox.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.manufacturersDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.parentDataGridView)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.modelsGroupBox.SuspendLayout();
             this.controlLayout.SuspendLayout();
             this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.modelsDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.childDataGridView)).BeginInit();
             this.mainLayout.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -59,7 +58,7 @@
             // 
             this.manufacturersGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.manufacturersGroupBox.Controls.Add(this.manufacturersDataGridView);
+            this.manufacturersGroupBox.Controls.Add(this.parentDataGridView);
             this.manufacturersGroupBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.manufacturersGroupBox.Location = new System.Drawing.Point(0, 2);
             this.manufacturersGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -68,20 +67,20 @@
             this.manufacturersGroupBox.Size = new System.Drawing.Size(349, 507);
             this.manufacturersGroupBox.TabIndex = 1;
             this.manufacturersGroupBox.TabStop = false;
-            this.manufacturersGroupBox.Text = "Manufacturers";
+            this.manufacturersGroupBox.Text = "Parent table";
             // 
-            // manufacturersDataGridView
+            // parentDataGridView
             // 
-            this.manufacturersDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.parentDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.manufacturersDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.manufacturersDataGridView.Location = new System.Drawing.Point(5, 21);
-            this.manufacturersDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.manufacturersDataGridView.Name = "manufacturersDataGridView";
-            this.manufacturersDataGridView.RowTemplate.Height = 24;
-            this.manufacturersDataGridView.Size = new System.Drawing.Size(339, 480);
-            this.manufacturersDataGridView.TabIndex = 0;
-            this.manufacturersDataGridView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyDown);
+            this.parentDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.parentDataGridView.Location = new System.Drawing.Point(5, 21);
+            this.parentDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.parentDataGridView.Name = "parentDataGridView";
+            this.parentDataGridView.RowTemplate.Height = 24;
+            this.parentDataGridView.Size = new System.Drawing.Size(339, 480);
+            this.parentDataGridView.TabIndex = 0;
+            this.parentDataGridView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyDown);
             // 
             // deleteButton
             // 
@@ -108,19 +107,6 @@
             this.addButton.Text = "Add";
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.addButton_Click);
-            // 
-            // refreshButton
-            // 
-            this.refreshButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.refreshButton.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.refreshButton.Location = new System.Drawing.Point(0, 53);
-            this.refreshButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.refreshButton.Name = "refreshButton";
-            this.refreshButton.Size = new System.Drawing.Size(236, 28);
-            this.refreshButton.TabIndex = 0;
-            this.refreshButton.Text = "Refresh";
-            this.refreshButton.UseVisualStyleBackColor = true;
-            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
             // 
             // statusStrip
             // 
@@ -153,7 +139,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.modelsGroupBox.Controls.Add(this.genericInputPanel);
             this.modelsGroupBox.Controls.Add(this.controlLayout);
-            this.modelsGroupBox.Controls.Add(this.modelsDataGridView);
+            this.modelsGroupBox.Controls.Add(this.childDataGridView);
             this.modelsGroupBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.modelsGroupBox.Location = new System.Drawing.Point(356, 2);
             this.modelsGroupBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -162,7 +148,7 @@
             this.modelsGroupBox.Size = new System.Drawing.Size(658, 507);
             this.modelsGroupBox.TabIndex = 3;
             this.modelsGroupBox.TabStop = false;
-            this.modelsGroupBox.Text = "Models";
+            this.modelsGroupBox.Text = "Child table";
             // 
             // controlLayout
             // 
@@ -176,8 +162,8 @@
             this.controlLayout.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.controlLayout.Name = "controlLayout";
             this.controlLayout.RowCount = 2;
-            this.controlLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 80.92243F));
-            this.controlLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 19.07757F));
+            this.controlLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 91.04166F));
+            this.controlLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 8.958333F));
             this.controlLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.controlLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.controlLayout.Size = new System.Drawing.Size(239, 480);
@@ -188,12 +174,11 @@
             this.panel2.Controls.Add(this.updateButton);
             this.panel2.Controls.Add(this.addButton);
             this.panel2.Controls.Add(this.deleteButton);
-            this.panel2.Controls.Add(this.refreshButton);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 388);
+            this.panel2.Location = new System.Drawing.Point(0, 436);
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(239, 92);
+            this.panel2.Size = new System.Drawing.Size(239, 44);
             this.panel2.TabIndex = 0;
             // 
             // updateButton
@@ -215,7 +200,7 @@
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Margin = new System.Windows.Forms.Padding(0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(239, 388);
+            this.panel3.Size = new System.Drawing.Size(239, 436);
             this.panel3.TabIndex = 1;
             // 
             // genericInputPanel
@@ -233,18 +218,18 @@
             this.genericInputPanel.Size = new System.Drawing.Size(233, 100);
             this.genericInputPanel.TabIndex = 2;
             // 
-            // modelsDataGridView
+            // childDataGridView
             // 
-            this.modelsDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.childDataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.modelsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.modelsDataGridView.Location = new System.Drawing.Point(5, 21);
-            this.modelsDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.modelsDataGridView.Name = "modelsDataGridView";
-            this.modelsDataGridView.RowTemplate.Height = 24;
-            this.modelsDataGridView.Size = new System.Drawing.Size(410, 480);
-            this.modelsDataGridView.TabIndex = 0;
+            this.childDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.childDataGridView.Location = new System.Drawing.Point(5, 21);
+            this.childDataGridView.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.childDataGridView.Name = "childDataGridView";
+            this.childDataGridView.RowTemplate.Height = 24;
+            this.childDataGridView.Size = new System.Drawing.Size(410, 480);
+            this.childDataGridView.TabIndex = 0;
             // 
             // mainLayout
             // 
@@ -286,13 +271,13 @@
             this.Text = "Generic DB management";
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.manufacturersGroupBox.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.manufacturersDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.parentDataGridView)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.modelsGroupBox.ResumeLayout(false);
             this.controlLayout.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.modelsDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.childDataGridView)).EndInit();
             this.mainLayout.ResumeLayout(false);
             this.mainLayout.PerformLayout();
             this.panel1.ResumeLayout(false);
@@ -301,15 +286,14 @@
         }
 
         #endregion
-        public System.Windows.Forms.DataGridView manufacturersDataGridView;
+        public System.Windows.Forms.DataGridView parentDataGridView;
         public System.Windows.Forms.GroupBox manufacturersGroupBox;
-        public System.Windows.Forms.Button refreshButton;
         public System.Windows.Forms.Button addButton;
         public System.Windows.Forms.StatusStrip statusStrip;
         public System.Windows.Forms.ToolStripStatusLabel statusStripText;
         public System.Windows.Forms.Button deleteButton;
         public System.Windows.Forms.GroupBox modelsGroupBox;
-        public System.Windows.Forms.DataGridView modelsDataGridView;
+        public System.Windows.Forms.DataGridView childDataGridView;
         public System.Windows.Forms.Button updateButton;
         public System.Windows.Forms.TableLayoutPanel mainLayout;
         public System.Windows.Forms.Panel panel1;

@@ -12,7 +12,7 @@ using System.Drawing;
 
 namespace Laborator_1
 {
-    class DatabaseHandler
+    class DatabaseHandler : IObserver
     {
         #region Declarations
         private string parentTableName;
@@ -44,7 +44,7 @@ namespace Laborator_1
 
         public SqlDataAdapter childAdapter;
         public SqlDataAdapter parentAdapter;
-        public static DataSet DataSet = new DataSet();
+        public DataSet dataSet;
 
         private BindingSource parentBindingSource;
         private BindingSource childBindingSource;
@@ -74,43 +74,35 @@ namespace Laborator_1
             childDeleteCommand = properties["childDeleteCommand"];
             childInsertCommand = properties["childInsertCommand"];
 
+            dataSet = new DataSet();
             CreateTables();
             CreateColumns();
 
-            parentBindingSource = new BindingSource();
-            childBindingSource = new BindingSource();
-
-            inputs = new List<Control>();
-            labels = new List<Label>();
-
-            // TODO uncomment when finishing generic addition of fields
-            AddFieldsInForm();
-            //form.manufacturersDataGridView.DataSource = parentBindingSource;
-            //form.modelsDataGridView.DataSource = childBindingSource;
-
-            
             // TODO fix foreign key constraint error when deleting
-            DataSet.Relations.Add("genericRelation", childForeignKeyRefColumn, childForeignKeyColumn);
+            dataSet.Relations.Add("genericRelation", childForeignKeyRefColumn, childForeignKeyColumn);
 
             childAdapter = new SqlDataAdapter("SELECT * FROM " + childTableName, Connection);
             parentAdapter = new SqlDataAdapter("SELECT * FROM " + parentTableName, Connection);
 
-            PrepareBindings();
-            //Temp_PrepareBindings();
+            AddFieldsInForm();
+
+            childBindingSource = new BindingSource();
+            parentBindingSource = new BindingSource();
+            PrepareNewBindings();
         }
 
         public void FillTables()
         {
-            DataSet.Tables[parentTableName].Clear();
-            parentAdapter.Fill(DataSet.Tables[parentTableName]);
-            DataSet.Tables[childTableName].Clear();
-            childAdapter.Fill(DataSet.Tables[childTableName]);
+            dataSet.Tables[parentTableName].Clear();
+            dataSet.Tables[childTableName].Clear();
+            parentAdapter.Fill(dataSet.Tables[parentTableName]);
+            childAdapter.Fill(dataSet.Tables[childTableName]);
         }
 
         private void CreateTables()
         {
-            DataSet.Tables.Add(childTableName);
-            DataSet.Tables.Add(parentTableName);
+            dataSet.Tables.Add(childTableName);
+            dataSet.Tables.Add(parentTableName);
         }
 
 
@@ -118,6 +110,10 @@ namespace Laborator_1
         {
             // TODO be careful with its design
             // TODO complete function
+
+            inputs = new List<Control>();
+            labels = new List<Label>();
+
             form.genericInputPanel.RowCount = childColumnNames.Length;
             form.genericInputPanel.ColumnCount = 2;
             form.genericInputPanel.Size = new Size(form.genericInputPanel.Size.Width, rowHeight * childColumnNames.Length);
@@ -125,45 +121,37 @@ namespace Laborator_1
             for (int i = 0; i < childColumnNames.Length; i++)
             {
                 Label l = new Label();
-                string propertyToModify;
 
                 l.Text = childColumnNames[i];
 
-                form.genericInputPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, Convert.ToSingle(rowHeight)));
-
                 if (childCommandParameterTypes[i] != "Date")
                 {
-                    propertyToModify = "Text";
                     inputs.Add(new TextBox());
                 }
                 else
                 {
-                    propertyToModify = "Value";
                     inputs.Add(new DateTimePicker());
                 }
 
+                form.genericInputPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, Convert.ToSingle(rowHeight)));
                 form.genericInputPanel.Controls.Add(inputs[i], 1, i);
                 form.genericInputPanel.Controls.Add(l, 0, i);
-                inputs[i].DataBindings.Add(propertyToModify, childBindingSource, childColumnNames[i]);
+
             }
         }
-
-        private void MakeCommands()
-        {
-        }
-
+        
         private void CreateColumns()
         {
             foreach (string name in childColumnNames)
             {
                 if (name != childForeignKeyColumnName)
                 {
-                    DataSet.Tables[childTableName].Columns.Add(name);
+                    dataSet.Tables[childTableName].Columns.Add(name);
                 }
                 else
                 {
                     childForeignKeyColumn = new DataColumn(name);
-                    DataSet.Tables[childTableName].Columns.Add(childForeignKeyColumn);
+                    dataSet.Tables[childTableName].Columns.Add(childForeignKeyColumn);
                 }
             }
 
@@ -171,12 +159,12 @@ namespace Laborator_1
             {
                 if (name != childForeignKeyRefColumnName)
                 {
-                    DataSet.Tables[parentTableName].Columns.Add(name);
+                    dataSet.Tables[parentTableName].Columns.Add(name);
                 }
                 else
                 {
                     childForeignKeyRefColumn = new DataColumn(childForeignKeyRefColumnName);
-                    DataSet.Tables[parentTableName].Columns.Add(childForeignKeyRefColumn);
+                    dataSet.Tables[parentTableName].Columns.Add(childForeignKeyRefColumn);
                 }
             }
         }
@@ -185,25 +173,46 @@ namespace Laborator_1
         {
             // TODO replace with generic command creator methods
             childAdapter.InsertCommand = MakeCommand(childInsertCommand);
-            Connection.Open();
-            childAdapter.InsertCommand.ExecuteNonQuery();
-            Connection.Close();
+            try
+            {
+                Connection.Open();
+                childAdapter.InsertCommand.ExecuteNonQuery();
+            }
+            finally
+            {
+                Connection.Close();
+            }
+            RefreshTables();
         }
 
         public void UpdateExistingEntry()
         {
             childAdapter.UpdateCommand = MakeCommand(childUpdateCommand);
-            Connection.Open();
-            childAdapter.UpdateCommand.ExecuteNonQuery();
-            Connection.Close();
+            try
+            {
+                Connection.Open();
+                childAdapter.UpdateCommand.ExecuteNonQuery();
+            }
+            finally
+            {
+                Connection.Close();
+            }
+            RefreshTables();
         }
 
         public void DeleteEntry()
         {
             childAdapter.DeleteCommand = MakeCommand(childDeleteCommand);
-            Connection.Open();
-            childAdapter.DeleteCommand.ExecuteNonQuery();
-            Connection.Close();
+            try
+            {
+                Connection.Open();
+                childAdapter.DeleteCommand.ExecuteNonQuery();
+            }
+            finally
+            {
+                Connection.Close();
+            }
+            RefreshTables();
         }
 
         private SqlDbType GetParameterType(string type)
@@ -238,47 +247,59 @@ namespace Laborator_1
             return insertCommand;
         }
 
-        private void PrepareBindings()
+        private void PrepareNewBindings()
         {
-            FillTables();
-            parentBindingSource.DataSource = DatabaseHandler.DataSet.Tables[parentTableName];
+            // Making new binding sources to cancel current bindings
+            BindingSource newChildBindingSource = new BindingSource();
+            BindingSource newParentBindingSource = new BindingSource();
 
-            childBindingSource.DataSource = parentBindingSource;
-            childBindingSource.DataMember = "genericRelation";
+            childBindingSource.ResetBindings(false);
+            parentBindingSource.ResetBindings(false);
 
-            form.manufacturersDataGridView.DataSource = parentBindingSource;
-            form.modelsDataGridView.DataSource = childBindingSource;
+            form.childDataGridView.DataSource = null;
+            form.parentDataGridView.DataSource = null;
+
+            dataSet.Tables[childTableName].Clear();
+            dataSet.Tables[parentTableName].Clear();
+
+            parentAdapter.Fill(dataSet.Tables[parentTableName]);
+            childAdapter.Fill(dataSet.Tables[childTableName]);
+
+
+            newParentBindingSource.DataSource = dataSet.Tables[parentTableName];
+            newChildBindingSource.DataSource = newParentBindingSource;
+            newChildBindingSource.DataMember = "genericRelation";
+
+            form.parentDataGridView.DataSource = newParentBindingSource;
+            form.childDataGridView.DataSource = newChildBindingSource;
+
+            for (int i = 0; i < childColumnNames.Length; i++)
+            {
+
+                string propertyToModify;
+                if (childCommandParameterTypes[i] != "Date")
+                {
+                    propertyToModify = "Text";
+                }
+                else
+                {
+                    propertyToModify = "Value";
+                }
+
+                inputs[i].DataBindings.Clear();
+                inputs[i].DataBindings.Add(propertyToModify, newChildBindingSource, childColumnNames[i]);
+            }
+
+            childBindingSource = newChildBindingSource;
+            parentBindingSource = newParentBindingSource;
         }
 
-        #region Temporary functions
-        // TODO eventually create a separate class containing the generated textboxes
-        //private SqlCommand Temp_MakeCommand(string command)
-        //{
-        //    SqlCommand insertCommand = new SqlCommand(command, DatabaseHandler.Connection);
-        //    insertCommand.Parameters.Add("@MoId", SqlDbType.Int).Value = form.modelIDTextBox.Text;
-        //    if (!insertCommand.CommandText.ToLower().StartsWith("delete"))
-        //    {
-        //        insertCommand.Parameters.Add("@Company", SqlDbType.Int).Value = form.companyTextBox.Text;
-        //        insertCommand.Parameters.Add("@Name", SqlDbType.VarChar).Value = form.nameTextBox.Text;
-        //        insertCommand.Parameters.Add("@ReleaseDate", SqlDbType.Date).Value = form.releaseDatePicker.Value;
-        //        insertCommand.Parameters.Add("@NumberSeats", SqlDbType.Int).Value = form.seatsNumberTextBox.Text;
-        //        insertCommand.Parameters.Add("@ChassisType", SqlDbType.VarChar).Value = form.chassisTypeTextBox.Text;
-        //    }
+        public void RefreshTables()
+        {
+            PrepareNewBindings();
+            form.childDataGridView.Refresh();
+            form.parentDataGridView.Refresh();
+        }
 
-        //    return insertCommand;
-        //}
-
-        //private void Temp_PrepareBindings()
-        //{
-
-        //    form.modelIDTextBox.DataBindings.Add("Text", childBindingSource, "MoId");
-        //    form.companyTextBox.DataBindings.Add("Text", childBindingSource, "Company");
-        //    form.nameTextBox.DataBindings.Add("Text", childBindingSource, "Name");
-        //    form.releaseDatePicker.DataBindings.Add("Value", childBindingSource, "ReleaseDate");
-        //    form.seatsNumberTextBox.DataBindings.Add("Text", childBindingSource, "NumberSeats");
-        //    form.chassisTypeTextBox.DataBindings.Add("Text", childBindingSource, "ChassisType");
-        //}
-
-        #endregion
     }
 }

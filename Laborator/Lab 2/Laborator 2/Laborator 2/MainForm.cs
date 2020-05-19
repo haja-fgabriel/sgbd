@@ -23,27 +23,18 @@ namespace Laborator_1
             databaseHandler = new DatabaseHandler(ConfigurationManager.AppSettings, this);
         }
 
-        private void RefreshTables(bool newData = false)
-        {
-            databaseHandler.FillTables();
-
-            modelsDataGridView.Refresh();
-            manufacturersDataGridView.Refresh();
-
-        }
+        
 
         private void AddEntry()
         {
             try
             {
                 databaseHandler.AddNewEntry();
-                RefreshTables();
-
                 UpdateStatusStrip();
             }
             catch (Exception ex)
             {
-                UpdateStatusStrip(true, ex.Message);
+                UpdateStatusStrip(false, ex.Message);
             }
         }
 
@@ -67,13 +58,12 @@ namespace Laborator_1
             try
             {
                 databaseHandler.UpdateExistingEntry();
-                RefreshTables();
 
                 UpdateStatusStrip();
             }
             catch (Exception ex)
             {
-                UpdateStatusStrip(true, ex.Message);
+                UpdateStatusStrip(false, ex.Message);
             }
         }
 
@@ -82,17 +72,12 @@ namespace Laborator_1
             try
             {
                 databaseHandler.DeleteEntry();
-                RefreshTables();
 
-                statusStrip.BackColor = Color.Blue;
-                statusStripText.ForeColor = Color.White;
-                statusStripText.Text = "Successfully updated value";
+                UpdateStatusStrip();
             }
             catch (Exception ex)
             {
-                statusStrip.BackColor = Color.Red;
-                statusStripText.ForeColor = Color.White;
-                statusStripText.Text = "Query failed. Error: " + ex.Message;
+                UpdateStatusStrip(false, ex.Message);
             }
         }
 
@@ -103,31 +88,18 @@ namespace Laborator_1
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
-            RefreshTables(false);
         }
 
         private void dataGridView1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F5)
-            {
-                RefreshTables(false);
-            }
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F5)
-            {
-                RefreshTables(false);
-            }
         }
 
         private void tabControl1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F5)
-            {
-                RefreshTables(false);
-            }
         }
 
         private void addButton_Click(object sender, EventArgs e)
