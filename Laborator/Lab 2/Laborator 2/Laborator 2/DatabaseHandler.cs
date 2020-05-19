@@ -218,6 +218,7 @@ namespace Laborator_1
             for (int i = 0; i < childColumnNames.Length; i++)
             {
                 string param = childCommandParameterNames[i];
+                string type = childCommandParameterTypes[i];
                 if (!command.Contains(param))
                 {
                     continue;
@@ -231,7 +232,7 @@ namespace Laborator_1
                 {
                     content = inputs[i].Text;
                 }
-                insertCommand.Parameters.Add(param, GetParameterType(param)).Value = content;
+                insertCommand.Parameters.Add(param, GetParameterType(type)).Value = content;
             }
 
             return insertCommand;
