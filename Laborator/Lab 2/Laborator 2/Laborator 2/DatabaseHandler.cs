@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace Laborator_1
 {
@@ -15,11 +16,15 @@ namespace Laborator_1
     {
         #region Declarations
         private string parentTableName;
-        private string childTableName;
-        private string[] childColumnNames;
-        private string[] childColumnTypes;
         private string[] parentColumnNames;
         private string parentPrimaryKeyColumnName;
+
+        private string childTableName;
+        private string[] childColumnNames;
+
+        private string[] childCommandParameterNames;
+        private string[] childCommandParameterTypes;
+
         private string childForeignKeyColumnName;
         private string childForeignKeyRefTableName;
         private string childForeignKeyRefColumnName;
@@ -45,6 +50,7 @@ namespace Laborator_1
         private BindingSource childBindingSource;
 
         private MainForm form;
+        private int rowHeight = 28;
 
         #endregion
 
@@ -56,7 +62,8 @@ namespace Laborator_1
             childTableName = properties["childTableName"];
             parentColumnNames = properties["parentColumnNames"].Split(',');
             childColumnNames = properties["childColumnNames"].Split(',');
-            childColumnTypes = properties["childColumnTypes"].Split(',');
+            childCommandParameterNames = properties["childCommandParameterNames"].Split(',');
+            childCommandParameterTypes = properties["childCommandParameterTypes"].Split(',');
 
             parentPrimaryKeyColumnName = properties["parentPrimaryKeyColumnName"];
             childForeignKeyColumnName = properties["childForeignKeyColumnName"];
@@ -73,13 +80,14 @@ namespace Laborator_1
             parentBindingSource = new BindingSource();
             childBindingSource = new BindingSource();
 
+            inputs = new List<Control>();
+            labels = new List<Label>();
+
             // TODO uncomment when finishing generic addition of fields
-            // AddFieldsInForm();
+            AddFieldsInForm();
             //form.manufacturersDataGridView.DataSource = parentBindingSource;
             //form.modelsDataGridView.DataSource = childBindingSource;
 
-            inputs = new List<Control>();
-            labels = new List<Label>();
             
             // TODO fix foreign key constraint error when deleting
             DataSet.Relations.Add("genericRelation", childForeignKeyRefColumn, childForeignKeyColumn);
@@ -87,7 +95,8 @@ namespace Laborator_1
             childAdapter = new SqlDataAdapter("SELECT * FROM " + childTableName, Connection);
             parentAdapter = new SqlDataAdapter("SELECT * FROM " + parentTableName, Connection);
 
-            Temp_PrepareBindings();
+            PrepareBindings();
+            //Temp_PrepareBindings();
         }
 
         public void FillTables()
@@ -104,57 +113,38 @@ namespace Laborator_1
             DataSet.Tables.Add(parentTableName);
         }
 
-        #region Temporary functions
-        // TODO eventually create a separate class containing the generated textboxes
-        private SqlCommand MakeCommand(string command)
-        {
-            SqlCommand insertCommand = new SqlCommand(command, DatabaseHandler.Connection);
-            insertCommand.Parameters.Add("@MoId", SqlDbType.Int).Value = form.modelIDTextBox.Text;
-            if (!insertCommand.CommandText.ToLower().StartsWith("delete"))
-            {
-                insertCommand.Parameters.Add("@Company", SqlDbType.Int).Value = form.companyTextBox.Text;
-                insertCommand.Parameters.Add("@Name", SqlDbType.VarChar).Value = form.nameTextBox.Text;
-                insertCommand.Parameters.Add("@ReleaseDate", SqlDbType.Date).Value = form.releaseDatePicker.Value;
-                insertCommand.Parameters.Add("@NumberSeats", SqlDbType.Int).Value = form.seatsNumberTextBox.Text;
-                insertCommand.Parameters.Add("@ChassisType", SqlDbType.VarChar).Value = form.chassisTypeTextBox.Text;
-            }
-
-            return insertCommand;
-        }
-        
-        private void Temp_PrepareBindings()
-        {
-            FillTables();
-
-            parentBindingSource.DataSource = DatabaseHandler.DataSet.Tables["Manufacturers"];
-
-            childBindingSource.DataSource = parentBindingSource;
-            childBindingSource.DataMember = "genericRelation";
-
-            form.manufacturersDataGridView.DataSource = parentBindingSource;
-            form.modelsDataGridView.DataSource = childBindingSource;
-
-            form.modelIDTextBox.DataBindings.Add("Text", childBindingSource, "MoId");
-            form.companyTextBox.DataBindings.Add("Text", childBindingSource, "Company");
-            form.nameTextBox.DataBindings.Add("Text", childBindingSource, "Name");
-            form.releaseDatePicker.DataBindings.Add("Value", childBindingSource, "ReleaseDate");
-            form.seatsNumberTextBox.DataBindings.Add("Text", childBindingSource, "NumberSeats");
-            form.chassisTypeTextBox.DataBindings.Add("Text", childBindingSource, "ChassisType");
-        }
-
-        #endregion
 
         private void AddFieldsInForm()
         {
+            // TODO be careful with its design
             // TODO complete function
+            form.genericInputPanel.RowCount = childColumnNames.Length;
+            form.genericInputPanel.ColumnCount = 2;
+            form.genericInputPanel.Size = new Size(form.genericInputPanel.Size.Width, rowHeight * childColumnNames.Length);
+
             for (int i = 0; i < childColumnNames.Length; i++)
             {
                 Label l = new Label();
+                string propertyToModify;
+
                 l.Text = childColumnNames[i];
-                inputs.Add(new TextBox());
-                form.modelsInputPanel.Controls.Add(inputs[i], 1, i);
-                form.modelsInputPanel.Controls.Add(l, 0, i);
-                inputs[i].DataBindings.Add("Text", childBindingSource, childColumnNames[i]);
+
+                form.genericInputPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, Convert.ToSingle(rowHeight)));
+
+                if (childCommandParameterTypes[i] != "Date")
+                {
+                    propertyToModify = "Text";
+                    inputs.Add(new TextBox());
+                }
+                else
+                {
+                    propertyToModify = "Value";
+                    inputs.Add(new DateTimePicker());
+                }
+
+                form.genericInputPanel.Controls.Add(inputs[i], 1, i);
+                form.genericInputPanel.Controls.Add(l, 0, i);
+                inputs[i].DataBindings.Add(propertyToModify, childBindingSource, childColumnNames[i]);
             }
         }
 
@@ -215,5 +205,79 @@ namespace Laborator_1
             childAdapter.DeleteCommand.ExecuteNonQuery();
             Connection.Close();
         }
+
+        private SqlDbType GetParameterType(string type)
+        {
+            return (SqlDbType)Enum.Parse(typeof(SqlDbType), type);
+        }
+
+        private SqlCommand MakeCommand(string command)
+        {
+            SqlCommand insertCommand = new SqlCommand(command, DatabaseHandler.Connection);
+
+            for (int i = 0; i < childColumnNames.Length; i++)
+            {
+                string param = childCommandParameterNames[i];
+                if (!command.Contains(param))
+                {
+                    continue;
+                }
+                object content;
+                if (inputs[i] is DateTimePicker)
+                {
+                    content = ((DateTimePicker)inputs[i]).Value;
+                }
+                else
+                {
+                    content = inputs[i].Text;
+                }
+                insertCommand.Parameters.Add(param, GetParameterType(param)).Value = content;
+            }
+
+            return insertCommand;
+        }
+
+        private void PrepareBindings()
+        {
+            FillTables();
+            parentBindingSource.DataSource = DatabaseHandler.DataSet.Tables[parentTableName];
+
+            childBindingSource.DataSource = parentBindingSource;
+            childBindingSource.DataMember = "genericRelation";
+
+            form.manufacturersDataGridView.DataSource = parentBindingSource;
+            form.modelsDataGridView.DataSource = childBindingSource;
+        }
+
+        #region Temporary functions
+        // TODO eventually create a separate class containing the generated textboxes
+        //private SqlCommand Temp_MakeCommand(string command)
+        //{
+        //    SqlCommand insertCommand = new SqlCommand(command, DatabaseHandler.Connection);
+        //    insertCommand.Parameters.Add("@MoId", SqlDbType.Int).Value = form.modelIDTextBox.Text;
+        //    if (!insertCommand.CommandText.ToLower().StartsWith("delete"))
+        //    {
+        //        insertCommand.Parameters.Add("@Company", SqlDbType.Int).Value = form.companyTextBox.Text;
+        //        insertCommand.Parameters.Add("@Name", SqlDbType.VarChar).Value = form.nameTextBox.Text;
+        //        insertCommand.Parameters.Add("@ReleaseDate", SqlDbType.Date).Value = form.releaseDatePicker.Value;
+        //        insertCommand.Parameters.Add("@NumberSeats", SqlDbType.Int).Value = form.seatsNumberTextBox.Text;
+        //        insertCommand.Parameters.Add("@ChassisType", SqlDbType.VarChar).Value = form.chassisTypeTextBox.Text;
+        //    }
+
+        //    return insertCommand;
+        //}
+
+        //private void Temp_PrepareBindings()
+        //{
+
+        //    form.modelIDTextBox.DataBindings.Add("Text", childBindingSource, "MoId");
+        //    form.companyTextBox.DataBindings.Add("Text", childBindingSource, "Company");
+        //    form.nameTextBox.DataBindings.Add("Text", childBindingSource, "Name");
+        //    form.releaseDatePicker.DataBindings.Add("Value", childBindingSource, "ReleaseDate");
+        //    form.seatsNumberTextBox.DataBindings.Add("Text", childBindingSource, "NumberSeats");
+        //    form.chassisTypeTextBox.DataBindings.Add("Text", childBindingSource, "ChassisType");
+        //}
+
+        #endregion
     }
 }

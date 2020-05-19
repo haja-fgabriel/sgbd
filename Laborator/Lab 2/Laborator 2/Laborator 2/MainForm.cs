@@ -16,16 +16,11 @@ namespace Laborator_1
     public partial class MainForm : Form
     {
         private DatabaseHandler databaseHandler;
-        private BindingSource parentBindingSource;
-        private BindingSource childBindingSource;
 
         public MainForm()
         {
             InitializeComponent();
             databaseHandler = new DatabaseHandler(ConfigurationManager.AppSettings, this);
-
-            parentBindingSource = new BindingSource();
-            childBindingSource = new BindingSource();
         }
 
         private void RefreshTables(bool newData = false)
